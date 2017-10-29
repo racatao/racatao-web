@@ -8,7 +8,7 @@
       <b-nav is-nav-bar class="ml-auto">
         <b-nav is-nav-bar>
           <router-link class="text-white btn" to="Search">Buscar Documentos</router-link>
-          <router-link class="text-white btn" to="Contribute">Contribua você também</router-link>
+          <router-link class="text-white btn" to="Why">Por que contribuir?</router-link>
           <router-link class="text-white btn disabled" to="Visualization" disabled>Visualizações</router-link>
         </b-nav>
       </b-nav>

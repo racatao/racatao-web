@@ -13,7 +13,10 @@
       <b-form-input v-model="search" type="text" placeholder="Busque documentos"></b-form-input>
     </b-col>
     <b-col cols="1">
-      <b-button @click="querySearch">Buscar</b-button>
+      <b-button @click="querySearch" :disabled="searchingRaw || searchingProcessed">
+        <i v-if="searchingRaw || searchingProcessed" class="fa fa-circle-o-notch fa-spin"></i>
+        <span v-else>Buscar</span>
+      </b-button>
     </b-col>
   </b-row>
   <hr>
@@ -37,7 +40,9 @@ export default {
     ],
     search: '',
     noResultsRaw: false,
-    noResultsProcessed: false
+    noResultsProcessed: false,
+    searchingRaw: false,
+    searchingProcessed: false
   }),
   computed: {
     noResults () {
@@ -55,7 +60,13 @@ export default {
         return
       }
 
+      if (this.searchingRaw || this.searchingProcessed) {
+        return
+      }
+
       this.items = []
+      this.searchingRaw = true
+      this.searchingProcessed = true
       const querystring = qs.stringify({
         search: this.search,
         'api-key': '5112AF0AAE64FF3EE9428CB0794C8034',
@@ -66,6 +77,7 @@ export default {
         `https://racatao-documents.search.windows.net/indexes/raw-files-index/docs?${querystring}`
       )
       .then((response) => {
+        this.searchingRaw = false
         console.log('received response', response)
         if (!response.data || !response.data.value) {
           console.log('received falsy data or value', response.data)
@@ -91,12 +103,14 @@ export default {
       })
       .catch((err) => {
         console.log('err', err)
+        this.searchingRaw = false
       })
 
       this.$http.get(
         `https://racatao-documents.search.windows.net/indexes/processed-files-index/docs?${querystring}`
       )
       .then((response) => {
+        this.searchingProcessed = false
         console.log('received response', response)
         if (!response.data || !response.data.value) {
           console.log('received falsy data or value', response.data)
@@ -122,6 +136,7 @@ export default {
       })
       .catch((err) => {
         console.log('err', err)
+        this.searchingProcessed = false
       })
     }
   }

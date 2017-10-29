@@ -17,6 +17,8 @@ export default {
 </script>
 
 <style>
+@import "~font-awesome/css/font-awesome.css";
+
 #app {
 }
 </style>

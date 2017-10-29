@@ -6,79 +6,68 @@
     lead="Ajude a transparencia da Unicamp em dois cliques:"
     fluid
   >
-    <b-form-file id="file_input1" v-model="file"></b-form-file>
-    <br> Arquivo selecionado: {{file && file.name}}
-    <br> <b-button @click="sendFile">Enviar</b-button>
-  </b-jumbotron>
-
-  <b-container>
+    <b-alert variant="success" :show="success" dismissible @dismissed="success = false">
+      Arquivo enviado com sucesso
+    </b-alert>
     <b-row>
-      <b-col>
-        <b-card title="Card Title"
-            img-src="https://lorempixel.com/600/300/food/5/"
-            img-alt="Image"
-            img-top
-            tag="article"
-            style="max-width: 20rem;"
-            class="mb-2">
-          <p class="card-text">
-            Some quick example text to build on the card title and make up the bulk of the card's content.
-          </p>
-          <b-button href="#" variant="primary">Busque documentos</b-button>
-        </b-card>
-      </b-col>
-      <b-col>
-        <b-card title="Card Title"
-            img-src="https://lorempixel.com/600/300/food/5/"
-            img-alt="Image"
-            img-top
-            tag="article"
-            style="max-width: 20rem;"
-            class="mb-2">
-          <p class="card-text">
-            Some quick example text to build on the card title and make up the bulk of the card's content.
-          </p>
-          <b-button href="#" variant="primary">Contribua você também</b-button>
-        </b-card>
-      </b-col>
-      <b-col>
-        <b-card title="Card Title"
-            img-src="https://lorempixel.com/600/300/food/5/"
-            img-alt="Image"
-            img-top
-            tag="article"
-            style="max-width: 20rem;"
-            class="mb-2">
-          <p class="card-text">
-            Some quick example text to build on the card title and make up the bulk of the card's content.
-          </p>
-          <b-button href="#" class="disabled" variant="primary">Visualizações</b-button>
-        </b-card>
+      <b-col><b-form-file id="file_input1" ref="fileinput" v-model="file"></b-form-file></b-col>
+      <b-col cols="2">
+        <b-button @click="sendFile">
+          <i v-if="sending" class="fa fa-circle-o-notch fa-spin"></i>
+          <span v-else>Enviar</span>
+        </b-button>
       </b-col>
     </b-row>
-  </b-container>
+  </b-jumbotron>
 
-  <b-container>
+  <b-carousel id="carousel1"
+              style="text-shadow: 1px 1px 2px #333;"
+              controls
+              indicators
+              background="#ababab"
+              :interval="4000"
+              img-width="1024"
+              img-height="480"
+              v-model="slide"
+              @sliding-start="onSlideStart"
+              @sliding-end="onSlideEnd"
+  >
+
+    <!-- Slides with custom text -->
+    <b-carousel-slide img-src="https://imgur.com/laBTsXL.png">
+    </b-carousel-slide>
+
+    <!-- Text slides with image -->
+    <b-carousel-slide img-src="https://imgur.com/tClP7S3.png"
+    ></b-carousel-slide>
+
+    <!-- Slides with image only -->
+    <b-carousel-slide img-src="https://imgur.com/nlAwL8N.png">
+    </b-carousel-slide>
+
+  </b-carousel>
+
+  <b-container class="padding-top">
     <b-jumbotron
       header="Sobre nós"
-      lead="Equipe Racatão, formada por quatro alunos de graduação"
+      lead="O Racatão é um projeto originado na Hack the Campus 2017, que teve como tema a Transparência na Unicamp. Nossa proposta é servir como um facilitador para que todos colaborem para a transparência dos dados públicos, servindo como um centro para a consulta dessas informações de modo padronizado por nossos sistemas."
     >
     <b-row>
       <b-col>
         <b-img rounded="circle" width="180" height="180" alt="img" class="m-1" src="https://imgur.com/A3n7J7H.jpg"/>
-        <p>Rose é topzera da balada na Microsoft</p>
+        <p>Rose é aluna de Engenharia Eletrica na UNICAMP. Além de Estagiária de serviços na Microsoft, realiza Iniciação Cientifica na área de Internet of Things e automação residencial.</p>
       </b-col>
       <b-col>
         <b-img rounded="circle" width="180" height="180" alt="img" class="m-1" src="https://imgur.com/SxhESMw.jpg"/>
-        <p>Douglão é o mitão da equipe</p>
+        <p>Douglas é aluno de Ciências da Computação, no ICMC. Também estagiário de serviços na Microsoft, com ampla experiencia em Startup Weekends e Maratonas de Programação.</p>
       </b-col>
       <b-col>
         <b-img rounded="circle" width="180" height="180" alt="img" class="m-1" src="https://i.imgur.com/QGYliCB.jpg"/>
-        <p>Salva é o de fora que entrou por sorte</p>
+        <p>Gustavo, também aluno do ICMC, é estagiário de Engenharia de Software na Calamar. Experiencias incluem: Operações, Desenvolvimento e Design de Interfaces Conversacionais</p>
       </b-col>
       <b-col>
         <b-img rounded="circle" width="180" height="180" alt="img" class="m-1" src="https://i.imgur.com/FNSYsJ6.jpg"/>
-        <p>Guru é o comedy relief do grupo</p>
+        <p>Lucas, também aluno do ICMC, participou do Data Science Game, evento internacional de Data Science sediado em Paris. Participador avido de Hackathons de Hardware.</p>
       </b-col>
     </b-row>
     </b-jumbotron>
@@ -92,7 +81,9 @@ export default {
   data: () => ({
     file: null,
     slide: 0,
-    sliding: null
+    sliding: null,
+    success: false,
+    sending: false
   }),
   methods: {
     onSlideStart (slide) {
@@ -102,6 +93,7 @@ export default {
       this.sliding = false
     },
     sendFile () {
+      this.sending = true
       function getBase64 (file) {
         return new Promise((resolve, reject) => {
           const reader = new FileReader()
@@ -117,9 +109,14 @@ export default {
         formData.set('file', encoded)
         this.$http.post(apiURL, formData)
         .then((res) => {
+          this.sending = false
           console.log(res.data)
+          this.success = true
+          this.file = null
+          this.$refs.fileinput.reset()
         })
         .catch((error) => {
+          this.sending = false
           console.log('error', error)
         })
       })
@@ -129,4 +126,7 @@ export default {
 </script>
 
 <style lang="css">
+.padding-top {
+  padding-top: 32px;
+}
 </style>
